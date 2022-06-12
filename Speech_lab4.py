@@ -99,7 +99,44 @@ from scipy import signal
 
 
 
-def generateSawTooth(f0=2, length = 2, fs=8000, order=10, height=1):
+# def generateSawTooth(f0=2, length = 2, fs=8000, order=10, height=1):
+#     """
+#     Return a saw-tooth signal with given parameters.
+    
+#     Parameters
+#     ----------
+#     f0 : float, optional
+#         fundamental frequency $f_0$ of the signal to be generated,
+#         default: 1 Hz
+#     length : float, optional
+#         length of the signal to be generated, default: 2 sec.
+#     fs : float, optional
+#         sampling frequency $f_s$, default: 8000 Hz
+#     order : int, optional
+#         number of sinosuids to approximate saw-tooth, default: 10
+#     height : float, optional
+#         height of saw-tooth, default: 1
+
+#     Returns
+#     -------
+#     sawTooth
+#         generated sawtooth signal
+#     t
+#         matching time vector
+#     """
+        
+#     t=np.arange(0,length,1/fs) # time vector
+#     sum = np.zeros(len(t))
+#     for ii in range(order):
+#         jj=ii+1
+#         sum += np.sin(2*np.pi*jj*f0*t)/jj
+#     return 2*height*sum/np.pi, t
+
+# saw,t = generateSawTooth(order=100)
+# plt.plot(t,saw)
+# plt.xlabel('time $t$ in seconds');
+
+def generateSawTooth2(f0=1, length = 2, fs=8000, order=10, height=1):
     """
     Return a saw-tooth signal with given parameters.
     
@@ -114,8 +151,6 @@ def generateSawTooth(f0=2, length = 2, fs=8000, order=10, height=1):
         sampling frequency $f_s$, default: 8000 Hz
     order : int, optional
         number of sinosuids to approximate saw-tooth, default: 10
-    height : float, optional
-        height of saw-tooth, default: 1
 
     Returns
     -------
@@ -124,15 +159,23 @@ def generateSawTooth(f0=2, length = 2, fs=8000, order=10, height=1):
     t
         matching time vector
     """
-        
-    t=np.arange(0,length,1/fs) # time vector
-    sum = np.zeros(len(t))
-    for ii in range(order):
-        jj=ii+1
-        sum += np.sin(2*np.pi*jj*f0*t)/jj
-    return 2*height*sum/np.pi, t
+    t=np.arange(0,length,1/fs)  # 时间向量
+    sawTooth = np.zeros(len(t)) # 用零来预分配变量
+    for ii in range(1,order+1):
+        sign = 2*(ii % 2) - 1# 创建交替的标志
+        sawTooth += np.sin(2*np.pi*ii*f0*t)/ii
+        print(str(ii)+': adding ' + str(sign) + ' sin(2 $\pi$ '+str(ii*f0)+' Hz t)')
+    return -2*height/np.pi*sawTooth, t
 
-saw,t = generateSawTooth(order=100)
-plt.plot(t,saw)
-plt.xlabel('time $t$ in seconds')
+f0 = 1
+saw2,t = generateSawTooth2(f0)
+plt.plot(t,saw2,label="sawtooth Fourier")
+plt.ylabel("$x_{\mathrm{saw}}(t)$")
+plt.xlabel("time$t$ in seconds")
+
+# 与scipy生成的锯齿形信号进行比较
+saw_scipy = signal.sawtooth(2*np.pi*f0*t)
+
+plt.plot(t,saw_scipy,"--",label="scipy sawtooth")
+plt.legend()
 plt.show()
